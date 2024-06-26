@@ -8,9 +8,7 @@ This repository provides a way to reproduce the results on two benchmark dataset
 
 **Train Ticket**: Train Ticket dataset is uploaded along with the code in this repository. 
 
-**MicroSS**: 
-
-Dataset needs to be downloaded from the original publisher (https://github.com/CloudWise-OpenSource/GAIA-DataSet/tree/main). Follow the steps below for preprocessing MicroSS dataset for PredX.
+**MicroSS**: Dataset needs to be downloaded from the original publisher (https://github.com/CloudWise-OpenSource/GAIA-DataSet/tree/main). Follow the steps below for preprocessing MicroSS dataset for PredX.
 
 1. Download metric and trace folders from: https://github.com/CloudWise-OpenSource/GAIA-DataSet/tree/main/MicroSS
 2. Extract the zip files for metrics and traces.
