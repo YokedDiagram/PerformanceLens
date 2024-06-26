@@ -1,4 +1,7 @@
 /MicroSS/data/*
+!/MicroSS/data/.gitkeep
 /MicroSS/metric_split/metric
 /MicroSS/trace_split/trace
 /MicroSS/traces/*
+!/MicroSS/traces/.gitkeep
+
