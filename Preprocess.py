@@ -14,26 +14,12 @@ from tqdm import tqdm
 import torch
 from torch_geometric.data import Data
 import math
-import torch_geometric.transforms as T
-from scipy.stats import norm, t
-import matplotlib.pyplot as plt
-import networkx as nx
-from scipy.stats import boxcox
-from scipy.special import inv_boxcox
-from torch_geometric.utils import to_networkx
-
 
 def prepare_data(path, normalize_features= [], normalize_by_node_features = [], scale_features = []):
     data = pd.DataFrame()
     data_dir = Path(path)
-    file_list = list(map(str, data_dir.glob("*.pkl")))
-    '''
-    ##################################################
-    print("\n***********File List************")
-    print(*file_list, sep='\n')
-    print("********************************\n")
-    ##################################################
-    '''
+    file_list = list(map(str, data_dir.glob("*admin-order_abort_1011.pkl")))
+
     print("\n********************************")
     print("*********Loading Files**********")
     print("********************************\n")
@@ -57,14 +43,6 @@ def prepare_data(path, normalize_features= [], normalize_by_node_features = [], 
     print(counts)
     print("*****************************************\n")
     ##################################################
-    #data = data[data['label'] != 1]
-    
-    counts = data['label'].value_counts()
-    ##################################################
-    print("\n***********Fault Distribution************")
-    print(counts)
-    print("*****************************************\n")
-    ##################################################
     
     outliers = ['d3fdfb558dfb754de55b9e8d80eeb7a3', \
                 'f8398b6b1ad61f915ff275141eb345e7', \
@@ -72,13 +50,6 @@ def prepare_data(path, normalize_features= [], normalize_by_node_features = [], 
                 '9f6fb14ccb19fc48668c1898c4835905', \
                 '6b479c5de1a70eb50b1ea151c93b6181']
     data = data[~data['trace_id'].isin(outliers)]
-    '''
-    occurrences = data['trace_integer'].value_counts()
-    # Filter out values with counts less than 10
-    trace_integers_to_keep = occurrences[occurrences >= 30].index.tolist()
-    # Filter original DataFrame based on the condition
-    data = data[data['trace_integer'].isin(trace_integers_to_keep)]
-    '''
     measures = {}
     data = data.reset_index(drop=True)
     transformation_features = normalize_by_node_features + normalize_features + scale_features
@@ -107,19 +78,6 @@ def order_data(data_row):
     for column in data_row.index:
         if isinstance(data_row[column], list):
             data_row[column] = [data_row[column][i] for i in sorted_indices]
-    '''
-    data_row['latency'] = [data_row['latency'][i] for i in sorted_indices]
-    data_row['original_latency'] = [data_row['original_latency'][i] for i in sorted_indices]
-    data_row['max_latency'] = data_row['latency'][-1]
-    data_row['s_t'] = [data_row['s_t'][i] for i in sorted_indices]
-    data_row['cpu_use'] = [data_row['cpu_use'][i] for i in sorted_indices]
-    data_row['mem_use_percent'] = [data_row['mem_use_percent'][i] for i in sorted_indices]
-    data_row['mem_use_amount'] = [data_row['mem_use_amount'][i] for i in sorted_indices]
-    data_row['net_send_rate'] = [data_row['net_send_rate'][i] for i in sorted_indices]
-    data_row['net_receive_rate'] = [data_row['net_receive_rate'][i] for i in sorted_indices]
-    data_row['file_read_rate'] = [data_row['file_read_rate'][i] for i in sorted_indices]
-    data_row['file_write_rate'] = [data_row['file_write_rate'][i] for i in sorted_indices]
-    '''
     data_row['trace_length'] = len(sorted_indices)
     return data_row
 
@@ -142,7 +100,7 @@ def normalize_by_trace(data, grouped_data=True):
     result.fillna(1, inplace=True)
     
     columns = ['latency']
-    values = values.groupby(['trace_integer', 's_t']).apply(normalize_cluster, columns=columns, center=False)
+    values = values.groupby(['trace_integer', 's_t']).apply(normalize_cluster, columns=columns)
     values = values.reset_index(drop=True)
     if grouped_data:
         print("Grouping by trace_id")
@@ -152,7 +110,7 @@ def normalize_by_trace(data, grouped_data=True):
         values = values.apply(lambda row: order_data(row), axis=1)
     return values, result
 
-def normalize_cluster(cluster, columns, center=True):
+def normalize_cluster(cluster, columns):
     data = cluster
     for column in columns:
         mean = data[column].mean()
@@ -165,55 +123,11 @@ def normalize_cluster(cluster, columns, center=True):
             cluster['maximum'] = maximum
             cluster['minimum'] = minimum
             cluster['count'] = count
-        df = cluster.shape[0] - 1
-        if df == 0:
-            df = 1
-
         if std == 0 or np.isnan(std):
-            if center:
-                cluster[column] = 0
-                z_scores = cluster[column]
             cluster['std'] = 1
         else:
-            if center:
-                z_scores = (cluster[column] - mean) / std
             cluster['std'] = std
-        if center:
-            #probabilities = gamma.cdf(cluster[column].astype('float32'), a=mean)
-            probabilities = norm.cdf(z_scores.to_numpy().astype(float))
-            cluster[column] = probabilities
-            '''
-            mean = cluster[column].mean()
-            std = cluster[column].std()
-            maximum = cluster[column].max()
-            minimum = cluster[column].min()
-            cluster['mean'] = mean
-            cluster['maximum'] = maximum
-            cluster['minimum'] = minimum
-            '''
     return cluster
-
-def recover_by_trace(values, trace_integers, edges, measures, original=False):
-    recovered_values = []
-    edges = pd.concat(edges).reset_index(drop=True)
-    for (value, trace_integer, edge) in zip(values, trace_integers, edges):
-        value = value.item()
-        
-        if value > 0.999999999:
-            value = 0.999999999
-        if value < 0.000000001:
-            value = 0.000000001
-        
-        mean = measures.loc[(trace_integer.item(), edge[0], edge[1]), 'mean']
-        std = measures.loc[(trace_integer.item(), edge[0], edge[1]), 'std']
-        df = measures.loc[(trace_integer.item(), edge[0], edge[1]), 'count']
-        if df == 0:
-            df = 1
-        #recovered_value = [gamma.ppf(value, a=mean)]
-        recovered_value = norm.ppf(value)
-        recovered_value = (recovered_value * std) + mean
-        recovered_values = recovered_values + [recovered_value]
-    return torch.tensor(recovered_values, dtype=torch.float32)
 
 def recover_by_cluster(values, trace_integers, measures):
     recovered_values = []
@@ -249,9 +163,7 @@ def scale(data, column):
     
     maximum = values[column].max()
     minimum = values[column].min()
-    print(maximum)
-    print(minimum)
-    data[column] = data[column].apply(lambda row: scale_values(row, maximum, minimum))
+    data[column] = data[column].apply(lambda row: scale_values(row))
     return data, maximum, minimum
 
 def log(value):
@@ -261,27 +173,12 @@ def log(value):
         scaled_value = 0
     return scaled_value
 
-def scale_values(values, maximum, minimum):
+def scale_values(values):
     scaled_values = []
-    maximum = log(maximum)
-    minimum = log(minimum)
     for value in values:
         scaled_value = log(value)
-        #scaled_value = (value - minimum) / (maximum-minimum)
         scaled_values = scaled_values + [scaled_value]
     return scaled_values
-
-def recover_value(values, maximum, minimum):
-    recovered_values = []
-    maximum = log(maximum)
-    minimum = log(minimum)
-    #recovered_values = inv_boxcox(values, maximum)
-    for value in values:
-        #value = ((maximum - minimum) * value) + minimum
-        recovered_value = 10 ** value
-        recovered_values = recovered_values + [recovered_value]
-    
-    return torch.tensor(recovered_values, dtype=torch.float32)
 
 def normalize_by_edge(data, column, grouped_data=True):
     values = pd.DataFrame()
@@ -361,16 +258,6 @@ def centre_by_group(values, edges, measures, grouped_data=True):
     
     return centred_values
 
-def recover_by_node(values, node_names, measures):
-    recovered_values = []
-    concatenated_names = pd.concat(node_names).reset_index(drop=True)
-    for (value, node) in zip(values, concatenated_names):
-        mean = measures.loc[node, 'average']
-        std = measures.loc[node, 'std_dev']
-        recovered_value = [(value * std) + mean]
-        recovered_values = recovered_values + [recovered_value]
-    return torch.tensor(recovered_values, dtype=torch.float32)
-
 def normalize(data, column, grouped_data=True):
     if grouped_data:
         total = 0
@@ -406,20 +293,7 @@ def centre(values, mean, std, column):
     for value in values:
         centred_value = (value - mean) / std
         centred_values = centred_values + [centred_value]
-    return centred_values
-
-def recover(values, mean, std):
-    recovered_values = []
-    for value in values:
-        value = value.item()
-        if value >= 0.99:
-            value = 0.99
-        elif value <= 0.01:
-            value = 0.01
-        value = norm.ppf(value)
-        recovered_values = recovered_values + [(value * std) + mean]
-    return torch.tensor(recovered_values, dtype=torch.float32)
-    
+    return centred_values    
 
 def prepare_global_map(data):
     global_map ={}
@@ -433,7 +307,7 @@ def prepare_global_map(data):
                 global_map[node] = max(global_map.values()) + 1
     return global_map
 
-def prepare_graph(trace, global_map, one_hot_enc, normalize_by_node_features = []):
+def prepare_graph(trace, global_map, normalize_by_node_features = []):
     nodes = {'cpu_use': trace['cpu_use'], \
              'mem_use_percent': trace['mem_use_percent'],
              'mem_use_amount': trace['mem_use_amount'],
@@ -450,12 +324,7 @@ def prepare_graph(trace, global_map, one_hot_enc, normalize_by_node_features = [
 
     #Create dataframe of edges
     edges = pd.DataFrame(trace['s_t'], columns = ['source', 'target'])
-    nedges = pd.DataFrame({'edges': trace['s_t']})['edges']
 
-    trace_integers = [trace['trace_integer']] * len(edges)
-    trace_integer = trace['trace_integer']
-    
-    
     edge_attr = {'mean': trace['mean'],\
                  'std': trace['std'],\
                  'max': trace['maximum'],\
@@ -465,7 +334,6 @@ def prepare_graph(trace, global_map, one_hot_enc, normalize_by_node_features = [
     #Assume that the metrics belong to the target node in the edge. Store the 
     #node name of the target with the metrics
     nodes['node_name'] = edges['target']
-    node_names = edges['target']
     
     y_edge_features = {'latency': trace['latency']}
     y_edge_features = pd.DataFrame(y_edge_features)
@@ -512,19 +380,6 @@ def prepare_graph(trace, global_map, one_hot_enc, normalize_by_node_features = [
     nodes = nodes.drop(columns=['node_id'])
     
     nodes['node_name'] = nodes['node_name'].map(global_map)
-    if one_hot_enc:
-        # Convert 'node_name' column to string to ensure proper encoding
-        nodes['node_name'] = nodes['node_name'].astype(str)
-    
-        # Perform one-hot encoding
-        one_hot_encoded = pd.get_dummies(nodes['node_name'], prefix='node')
-        
-        # Reindex the one-hot encoded DataFrame to ensure the desired number of columns
-        one_hot_encoded = one_hot_encoded.reindex(columns=[str(i) for i in range(len(global_map))], fill_value=0)
-    
-        # Concatenate the one-hot encoded columns with the original DataFrame
-        nodes = pd.concat([nodes.drop(columns=['node_name']), one_hot_encoded], axis=1)
-
     
     #Convert to tensors
     nodes_tensor = torch.tensor(nodes.values, dtype=torch.float32)
@@ -532,57 +387,21 @@ def prepare_graph(trace, global_map, one_hot_enc, normalize_by_node_features = [
     y_edge_tensor = torch.tensor(y_edge_features.values, dtype=torch.float32).squeeze(dim=1)
     original = torch.tensor(original.values, dtype=torch.float32)
     trace_lat_tensor = torch.tensor(trace_lat, dtype=torch.float32)
-    trace_integers_tensor = torch.tensor(trace_integers, dtype=torch.long)
-    trace_integer_tensor = torch.tensor(trace_integer, dtype=torch.long)
     edge_attr_tensor = torch.tensor(edge_attr.values, dtype=torch.float32)
     graph = Data(x=nodes_tensor, edge_index=edges_tensor, edge_attr=edge_attr_tensor, y=y_edge_tensor, trace_lat=trace_lat_tensor)
-    #graph.trace_integers = trace_integers_tensor
-    #graph.node_names = nedges
-    #graph.first_node = nedges[-1:]
     graph.original = original
 
     return graph
 
-def preprocess(path, one_hot_enc = False, normalize_features = [], normalize_by_node_features = [], scale_features = []):
+def preprocess(path):
     tqdm.pandas()
+    normalize_features = ['cpu_use', 'mem_use_percent', 'mem_use_amount', 'net_send_rate', 'net_receive_rate', 'file_read_rate']
+    normalize_by_node_features = ['cpu_use', 'mem_use_percent', 'mem_use_amount', 'net_send_rate', 'net_receive_rate', 'file_read_rate']
+    scale_features = ['latency']
     data, global_map, measures = prepare_data(path, normalize_features, normalize_by_node_features, scale_features)
     print("\n********************************")
     print("********Preparing Graphs**********")
     print("********************************\n")
-    graphs = data.progress_apply(lambda trace: prepare_graph(trace, global_map, one_hot_enc, normalize_by_node_features), axis=1)
+    graphs = data.progress_apply(lambda trace: prepare_graph(trace, global_map, normalize_by_node_features), axis=1)
     graphs = graphs.to_list()
     return data, graphs, global_map, measures
-
-if __name__ == "__main__":   
-    data, graphs, global_map, measures = preprocess('./TrainTicket/', one_hot_enc=False, normalize_features=[], \
-    normalize_by_node_features=[])
-    #normal = data[data['label'] != 1]
-    #abnormal = data[data['label'] == 1]
-    latencies = data['latency'].explode()
-    # Plot a histogram of the latencies
-    plt.figure(figsize=(10, 6))  # Adjust the figure size as needed
-    plt.hist(latencies, bins=30, color='skyblue', edgecolor='black')
-    plt.title('Distribution of Latencies')
-    plt.xlabel('Latency')
-    plt.ylabel('Frequency')
-    plt.grid(True)
-    plt.show()
-    '''
-    latencies = abnormal['latency'].explode()
-    # Plot a histogram of the latencies
-    plt.figure(2, figsize=(10, 6))  # Adjust the figure size as needed
-    plt.hist(latencies, bins=30, color='skyblue', edgecolor='black')
-    plt.title('Distribution of Latencies')
-    plt.xlabel('Latency')
-    plt.ylabel('Frequency')
-    plt.grid(True)
-    plt.show()
-    '''
-    graph = graphs[386]
-    #inv_map = inv_maps[386]
-    #g = to_networkx(graph, to_undirected=False)
-    #plt.figure()
-    #nx.draw(g, labels = inv_map, with_labels = True)
-    #plt.show
-    #data['p_latency'] = data['latency']
-    #data = data.explode('latency')

@@ -5,37 +5,27 @@ Created on Fri Apr 19 15:03:36 2024
 @author: Hamza
 """
 
-import pickle
-import os
-import re
-import pandas as pd
-import numpy as np
-from datetime import datetime
-from pathlib import Path
-from tqdm import tqdm
-import torch
-from torch_geometric.data import Data
-import math
-import matplotlib.pyplot as plt
-import networkx as nx
-from scipy.stats import boxcox
-from scipy.special import inv_boxcox
-from torch_geometric.utils import to_networkx
 import sys
 sys.path.append('../')
+import os
+import pandas as pd
+import numpy as np
+from tqdm import tqdm
+#Custom Import
 from Preprocess import get_trace_integer
 
 def process_traces(path):
-    data_dir = Path(path)
     data = pd.DataFrame()
     all_files = os.listdir(path)
+    all_files = [f for f in all_files if f.endswith('.csv')]
+
     for trace_file in tqdm(all_files):
         df = pd.read_csv(os.path.join(path, trace_file))
         df = df[['timestamp', 'trace_id', 'service_name', 'span_id', 'parent_id', 'start_time', 'end_time']]
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         df['rounded_timestamp'] = df['timestamp'].apply(round_to_30_seconds)
-        df['start_time'] = pd.to_datetime(df['start_time'])
-        df['end_time'] = pd.to_datetime(df['end_time'])
+        df['start_time'] = pd.to_datetime(df['start_time'], format='mixed')
+        df['end_time'] = pd.to_datetime(df['end_time'], format='mixed')
         df['latency'] = (df['end_time'] - df['start_time']).dt.total_seconds() * 1000
         df['original_latency'] = df['latency']
         df['latency'] = np.log10(df['latency'])

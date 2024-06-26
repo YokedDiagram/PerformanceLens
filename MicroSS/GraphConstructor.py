@@ -12,7 +12,6 @@ from tqdm import tqdm
 import sys
 sys.path.append('../')
 from Preprocess import normalize_by_trace, normalize
-import pickle
 from torch_geometric.data import Data
 
 
