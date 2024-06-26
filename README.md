@@ -14,7 +14,7 @@ This repository provides a way to reproduce the results on two benchmark dataset
 2. Extract the zip files for metrics and traces.
 3. Copy the raw csv files for metrics to ./MicroSS/metric_split/metric folder
 4. Copy the raw csv files for traces to ./MicroSS/trace_split/trace
-5. Run PreprocessMetric.py file
-6. Run PreprocessTraces.py file
+5. Run PreprocessMetric.py file in ./MicroSS directory
+6. Run PreprocessTraces.py file in ./MicroSS directory
 
 
