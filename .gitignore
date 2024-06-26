@@ -1,4 +1,4 @@
-/MicroSS/data/
-/MicroSS/metric_split/
-/MicroSS/trace_split/
-/MicroSS/traces/
+/MicroSS/data/*
+/MicroSS/metric_split/metric
+/MicroSS/trace_split/trace
+/MicroSS/traces/*
