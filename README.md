@@ -32,6 +32,7 @@ This repository provides a way to reproduce the results on two benchmark dataset
    
       f. numpy
 **2.** Open Main.py file
+
 **3.** Set environment variables such as data_dir, model_choice, predict_graph, and validate_on_trace
    
       a. data_dir can be set to either './TrainTicket/' or './MicroSS/' depending on the dataset to be used.
