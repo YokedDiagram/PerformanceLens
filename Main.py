@@ -13,7 +13,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 #Set Environment Variables
-data_dir = './MicroSS/'
+data_dir = './TrainTicket/'
 model_choice = 'PredX-GNN'
 predict_graph = True
 validate_on_trace = False

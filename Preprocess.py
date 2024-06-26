@@ -18,7 +18,7 @@ import math
 def prepare_data(path, normalize_features= [], normalize_by_node_features = [], scale_features = []):
     data = pd.DataFrame()
     data_dir = Path(path)
-    file_list = list(map(str, data_dir.glob("*admin-order_abort_1011.pkl")))
+    file_list = list(map(str, data_dir.glob("*.pkl")))
 
     print("\n********************************")
     print("*********Loading Files**********")
