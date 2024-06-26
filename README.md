@@ -19,20 +19,30 @@ This repository provides a way to reproduce the results on two benchmark dataset
 
 ### Usage
 1. Install the following packages:
+   
    a. torch
+   
    b. torch_geometric
+   
    c. torchmetrics
+   
    d. tqdm
+   
    e. pandas
+   
    f. numpy
-3. Open Main.py file
-4. Set environment variables such as data_dir, model_choice, predict_graph, and validate_on_trace
+2. Open Main.py file
+3. Set environment variables such as data_dir, model_choice, predict_graph, and validate_on_trace
+   
    a. data_dir can be set to either './TrainTicket/' or './MicroSS/' depending on the dataset to be used.
+   
    b. model_choice can be set to either 'PredX-GNN' or 'PredX-Hybrid' de[ending on whether PredX should be run with or without the GRU block.
+   
    c. predict_graph can be either True or False. If set to True, the model will only predict end-to-end latencies.
+   
    d. validate_on_trace can be either True or False. It can only be set to True if predict_graph is set to False. If set to True, the validation results will be 
       based on end-to-end latencies only.
-6. Run the Main.py file.
+4. Run the Main.py file.
 
 
 
