@@ -20,11 +20,17 @@ This repository provides a way to reproduce the results on two benchmark dataset
 ### Usage
 **1.** Install the following packages:
       a. matplotlib==3.8.0
+      
       b. numpy==2.0.1
+
       c. pandas==2.2.2
+      
       d. torch==2.3.0
+      
       e. torch_geometric==2.5.3
-      f. torchmetrics==1.4.0.post0
+      
+      f. torchmetrics==1.4.0.0
+      
       g. tqdm==4.65.0
       
 **2.** Open Main.py file
