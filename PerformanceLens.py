@@ -10,9 +10,9 @@ import torch.nn.functional as F
 from torch_geometric.nn import GATConv, global_add_pool, global_mean_pool
 from torch.nn import Embedding
 
-class PredXGNN(torch.nn.Module):
+class PerformanceLensGNN(torch.nn.Module):
     def __init__(self, input_dim, hidden_dim, vocab_size, embedding_dim, output_dim, predict_graph=True, pool='add'):
-        super(PredXGNN, self).__init__()
+        super(PerformanceLensGNN, self).__init__()
         self.embedding = Embedding(vocab_size, embedding_dim)
         self.conv1 = GATConv(input_dim+embedding_dim, hidden_dim)
         self.conv2 = GATConv(hidden_dim, hidden_dim)
@@ -50,9 +50,9 @@ class PredXGNN(torch.nn.Module):
         x = F.leaky_relu(x, 0.01)
         return x
 
-class PredXHybrid(torch.nn.Module):
+class PerformanceLensHybrid(torch.nn.Module):
     def __init__(self, input_dim, hidden_dim, vocab_size, embedding_dim, output_dim, predict_graph=True):
-        super(PredXHybrid, self).__init__()
+        super(PerformanceLensHybrid, self).__init__()
         self.embedding = Embedding(vocab_size, embedding_dim)
         self.conv1 = GATConv(input_dim+embedding_dim, hidden_dim)
         self.conv2 = GATConv(hidden_dim, hidden_dim)

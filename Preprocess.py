@@ -18,7 +18,7 @@ import math
 def prepare_data(path, normalize_features= [], normalize_by_node_features = [], scale_features = []):
     data = pd.DataFrame()
     data_dir = Path(path)
-    file_list = list(map(str, data_dir.glob("*.pkl")))
+    file_list = list(map(str, data_dir.glob("*1011.pkl")))
 
     print("\n********************************")
     print("*********Loading Files**********")
@@ -390,6 +390,7 @@ def prepare_graph(trace, global_map, normalize_by_node_features = []):
     edge_attr_tensor = torch.tensor(edge_attr.values, dtype=torch.float32)
     graph = Data(x=nodes_tensor, edge_index=edges_tensor, edge_attr=edge_attr_tensor, y=y_edge_tensor, trace_lat=trace_lat_tensor)
     graph.original = original
+    graph.label = torch.tensor(trace['label'][0], dtype=torch.long)
 
     return graph
 

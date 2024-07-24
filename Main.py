@@ -7,28 +7,28 @@ Created on Mon Mar  4 13:57:41 2024
 """
 import torch
 from ModelTrainer import ModelTrainer, multi_quantile_loss
-from PredX import PredXGNN, PredXHybrid
+from PerformanceLens import PerformanceLensGNN, PerformanceLensHybrid
 import warnings
 
 warnings.filterwarnings('ignore')
 
 #Set Environment Variables
 data_dir = './TrainTicket/'
-model_choice = 'PredX-GNN'
-predict_graph = True
+model_choice = 'PerformanceLens-Hybrid'
+predict_graph = False
 validate_on_trace = False
 
 if 'TrainTicket' in  data_dir:
     trainer_text = """
-    ############################################################
-    ########### PredX Trained on Train Ticket Dataset ##########
-    ############################################################
+    ######################################################################
+    ########### PerformanceLens Trained on Train Ticket Dataset ##########
+    ######################################################################
     """
 else:
     trainer_text = """
-    #############################################################
-    ########### PredX Trained on MicroSS Dataset     ############
-    #############################################################
+    ######################################################################
+    ########### PerformanceLens Trained on MicroSS Dataset   #############
+    ######################################################################
     """
 print(trainer_text)
 
@@ -45,16 +45,16 @@ vocab_size = len(model_trainer.global_map)
 node_embedding_size = 30
 output_dim = len(quantiles)
 
-if model_choice == 'PredX-GNN':
-    model = PredXGNN(input_dim, hidden_dim, vocab_size, node_embedding_size, output_dim,\
+if model_choice == 'PerformanceLens-GNN':
+    model = PerformanceLensGNN(input_dim, hidden_dim, vocab_size, node_embedding_size, output_dim,\
                 predict_graph=model_trainer.predict_graph)
 else:
-    model = PredXHybrid(input_dim, hidden_dim, vocab_size, node_embedding_size, output_dim,\
+    model = PerformanceLensHybrid(input_dim, hidden_dim, vocab_size, node_embedding_size, output_dim,\
                 predict_graph=model_trainer.predict_graph)
 model_trainer.set_model(model)
 
 # Define Loss functions and optimizer
-epochs = 2
+epochs = 10
 criterion = torch.nn.L1Loss(reduction='mean')
 optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 model = model_trainer.train(epochs, multi_quantile_loss, criterion, optimizer)

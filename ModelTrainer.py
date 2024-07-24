@@ -4,8 +4,6 @@ Created on Wed Feb 14 10:21:41 2024
 
 @author: Hamza
 """
-
-
 import sys
 sys.path.append('./MicroSS')
 import torch
@@ -18,8 +16,7 @@ from torchmetrics import MeanAbsolutePercentageError
 from CustomDataset import CustomDataset
 from Preprocess import preprocess
 from GraphConstructor import process_micross
-
-
+import matplotlib.pyplot as plt
 
 class ModelTrainer():
     def __init__(self, path, batch_size, quantiles=[], predict_graph=True, \
@@ -153,7 +150,7 @@ class ModelTrainer():
         print(recovered)
         
         return recov_pred
-    
+
 def calculate_metrics(quantiles, target, predictions, epoch, epochs):
     for i, quantile in enumerate(quantiles):
         mape = MAPE(predictions[:,i], target)
@@ -238,10 +235,11 @@ def get_latency_regions(x,y, rescale=False):
     
     p_values = [percentile_10, percentile_25, percentile_50, percentile_75, percentile_90, percentile_95]
     
-    index_1 = np.where((x <= 50))[0]
-    index_2 = np.where((x > 50) & (x <= 100))[0]
-    index_3 = np.where((x > 100) & (x <= 1000))[0]
-    index_4 = np.where((x > 10000))[0]    
+    index_1 = np.where((x < 1))[0]
+    index_2 = np.where((x > 1) & (x <= 50))[0]
+    index_3 = np.where((x > 50) & (x <= 100))[0]
+    index_4 = np.where((x > 100) & (x <= 1000))[0] 
+    index_5 = np.where((x > 1)[0])
     
     if rescale:
         x_1 = x[index_1]
@@ -256,7 +254,8 @@ def get_latency_regions(x,y, rescale=False):
         x_4 = x[index_4].flatten()
         y_4 = y[index_4].flatten()
         
-        r_5 = {'x': x, 'y': y, 'p': p_values}
+        x_5 = x[index_5].flatten()
+        y_5 = y[index_5].flatten()
     else:
         x_1 = o_x[index_1]
         y_1 = o_y[index_1]
@@ -270,7 +269,8 @@ def get_latency_regions(x,y, rescale=False):
         x_4 = o_x[index_4].flatten()
         y_4 = o_y[index_4].flatten()
         
-        r_5 = {'x': o_x, 'y': o_y, 'p': p_values}
+        x_5 = o_x[index_5].flatten()
+        y_5 = o_y[index_5].flatten()
         
     regions = {}
     # Slice values based on percentiles
@@ -286,6 +286,7 @@ def get_latency_regions(x,y, rescale=False):
     r_4 = {'x': x_4, 'y': y_4, 'p': p_values}
     regions[4] = r_4
     
+    r_5 = {'x': x_5, 'y': y_5, 'p': p_values}
     regions[5] = r_5
 
     return regions
