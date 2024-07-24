@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-
-"""
-Created on Mon Mar  4 13:57:41 2024
-
-@author: Hamza
-"""
 import torch
 from ModelTrainer import ModelTrainer, multi_quantile_loss
 from PerformanceLens import PerformanceLensGNN, PerformanceLensHybrid
@@ -13,7 +7,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 #Set Environment Variables
-data_dir = './TrainTicket/'
+data_dir = './MicroSS/'
 model_choice = 'PerformanceLens-Hybrid'
 predict_graph = False
 validate_on_trace = False

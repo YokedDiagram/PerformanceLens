@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed May 29 11:32:25 2024
-
-@author: Hamza
-"""
-
 import torch
 from pathlib import Path
 import pandas as pd

@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Feb 14 10:21:41 2024
-
-@author: Hamza
-"""
 import sys
 sys.path.append('./MicroSS')
 import torch

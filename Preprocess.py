@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Feb 22 10:23:12 2024
-
-@author: Hamza
-"""
-
 import pickle
 import pandas as pd
 import numpy as np

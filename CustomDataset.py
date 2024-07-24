@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Feb 22 10:20:20 2024
-
-@author: Hamza
-"""
-
 from torch.utils.data import Dataset
 from torch_geometric.transforms import NormalizeFeatures
 from torch_geometric.loader import DataLoader

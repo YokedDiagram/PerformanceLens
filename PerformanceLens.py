@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Feb 22 10:32:12 2024
-
-@author: Hamza
-"""
-
 import torch
 import torch.nn.functional as F
 from torch_geometric.nn import GATConv, global_add_pool, global_mean_pool

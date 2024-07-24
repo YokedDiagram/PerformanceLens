@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Apr 19 15:03:36 2024
-
-@author: Hamza
-"""
-
 import sys
 sys.path.append('../')
 import os
