@@ -1,7 +1,7 @@
-# Pred X
+# PefrormanceLens
 
-### Multi-modal Performance Prediction in Microservices Based Applications
-PredX is a Neural Network model that utilizes a hybrid Graph Neural Network/Gated Recurrent Unit architecture to predict latency distribution of an API request. Not only do we predict end-to-end latency distribution but also the distribution of individual microservice calls involved in an API request.
+### Fine-Grained Latency Distribution Prediction for Microservice Call Chains in Cloud-Native Applications
+PerformanceLens is a Neural Network model that utilizes a hybrid Graph Neural Network/Gated Recurrent Unit architecture to predict latency distribution of an API request. Not only do we predict end-to-end latency distribution but also the distribution of individual microservice calls involved in an API request.
 
 ### Datasets
 This repository provides a way to reproduce the results on two benchmark datasets: Train Ticket and MicroSS.
@@ -37,12 +37,14 @@ This repository provides a way to reproduce the results on two benchmark dataset
    
       a. data_dir can be set to either './TrainTicket/' or './MicroSS/' depending on the dataset to be used.
    
-      b. model_choice can be set to either 'PredX-GNN' or 'PredX-Hybrid' depending on whether PredX should be run with or without the GRU block.
+      b. model_choice can be set to either 'PerformanceLens-GNN' or 'PerformanceLens-Hybrid' depending on whether PerformanceLens should be run with or without the GRU block.
    
       c. predict_graph can be either True or False. If set to True, the model will only predict end-to-end latencies.
    
       d. validate_on_trace can be either True or False. It can only be set to True if predict_graph is set to False. If set to True, the validation results will be 
       based on end-to-end latencies only.
+
+      e. The data files to be used can be changed based on the file_list variable (line 21) in Preprocess.py file
 **4.** Run the Main.py file.
 
 
