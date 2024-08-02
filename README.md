@@ -33,6 +33,8 @@ This repository provides a way to reproduce the results on two benchmark dataset
       f. torchmetrics==1.4.0.0
       
       g. tqdm==4.65.0
+
+      h. scikit_learn==1.2.2 (Required for AnomalyTrainer.py)
       
 **2.** Open Main.py file
 
@@ -51,6 +53,6 @@ This repository provides a way to reproduce the results on two benchmark dataset
 **4.** Run the Main.py file.
 
 ### Extras
-Anomaly Detection folder contains data constructed using output of PerformanceLENS on Train Ticket dataset. 
-AnomalyTrainer.py file can be used to reproduce the Anomaly Detection experiment on the created dataset.
+Anomaly Detection folder contains data constructed using output of PerformanceLENS on Train Ticket dataset. This dataset can be used to perform trace based anomaly detection using the latency distribution output of PerformanceLENS.
+AnomalyTrainer.py file can be run to reproduce the Anomaly Detection experiment on the created dataset. In the experiment we use traditional ML models trained on PerformanceLENS output to detect trace based anomalies.
 
