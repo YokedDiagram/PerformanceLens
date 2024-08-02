@@ -50,5 +50,7 @@ This repository provides a way to reproduce the results on two benchmark dataset
       e. The data files to be used can be changed based on the file_list variable (line 21) in Preprocess.py file
 **4.** Run the Main.py file.
 
-
+### Extras
+Anomaly Detection folder contains data constructed using output of PerformanceLENS on Train Ticket dataset. 
+AnomalyTrainer.py file can be used to reproduce the Anomaly Detection experiment on the created dataset.
 
